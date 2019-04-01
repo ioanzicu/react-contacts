@@ -8,6 +8,7 @@ class App extends Component {
   state = {
     contacts: []
   }
+
   removeContact = (contact) => {
     this.setState((state) => ({
       contacts: state.contacts.filter((c) => c.id !== contact.id)
@@ -15,11 +16,21 @@ class App extends Component {
 
     ContactsAPI.remove(contact)
   }
+
   componentDidMount() {
     ContactsAPI.getAll().then((contacts) => {
       this.setState({ contacts })
     })
   }
+
+  createContact(contact) {
+    ContactsAPI.create(contact).then(contact => {
+      this.setState(state => ({
+        contacts: state.contacts.concat([ contact ])
+      }))
+    })
+  }
+
   render() {
     return(
       <div className="app">
@@ -29,7 +40,14 @@ class App extends Component {
             onDeleteContact={this.removeContact}
           />
         )}/>
-        <Route path="/create" component={CreateContacts}/>
+        <Route path="/create" render={({ history }) => (
+          <CreateContacts
+            onCreateContact={(contact) => {
+              this.createContact(contact)
+              history.push('/')
+            }}
+          />
+        )}/>
       </div>
     )
   }
